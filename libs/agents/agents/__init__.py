@@ -1,1 +1,1 @@
-from base_agent import BaseAgent
+from libs.agents.agents.openai_agent import OpenAIAgent

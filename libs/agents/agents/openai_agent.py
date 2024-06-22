@@ -6,7 +6,7 @@ import time
 
 openai.api_key = os.getenv("OPENAI_API_KEY", "your-api-key")
 
-class BaseAgent:
+class OpenAIAgent:
     client = openai.OpenAI()
 
     def call(self, prompt='', query='', model:type[BaseModel]=None, schema=None, **kwargs):
@@ -89,6 +89,6 @@ if __name__ == '__main__':
         weather: str
         city: str
         
-    agent = BaseAgent()
+    agent = OpenAIAgent()
     agent.call(query="hi, can u get me weather of nyc", model=WeatherModel)
 
