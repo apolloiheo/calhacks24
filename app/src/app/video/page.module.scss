@@ -1,0 +1,153 @@
+$orange: hsl(24.6 95% 53.1%);
+$blue: hsl(221.2, 83.2%, 53.3%);
+$green: hsl(142.1 76.2% 36.3%);
+
+$blue2: hsl(221.2, 83.2%, 73.3%);
+$blue3: hsl(221.2, 83.2%, 88.3%);
+$blue4: hsl(221.2, 83.2%, 96.3%);
+
+$navy: rgb(15, 23, 42);
+
+.container {
+    margin: 0;
+    padding: 0;
+
+    height: 100vh;
+    
+    display: flex;
+    flex-direction: row;
+
+    padding: 120px 0 80px 100px;
+    // padding-top: 120px;
+    // padding: 20px;
+
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    // border: 1px solid #A9AFD1;
+    // border-radius: 8px;
+    background-color: white;
+
+    gap: 50px;
+    overflow-y: hidden;
+
+    z-index: 1;
+}
+
+.left {
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    width: 630px;
+    // height: 700px;
+
+    gap: 30px;
+}
+
+.heading {
+    width: 100%;
+    padding: 20px 30px;
+    // background-color: #f8f8f8;
+    // background: linear-gradient(to right, #ff7e5f, #feb47b);
+    // border-top-left-radius: 8px;
+    // border-top-right-radius: 8px;
+    // border: 1px solid $green;
+    // border-radius: 8px;
+
+    h2 {
+        font-weight: 600;
+        font-size: 18px;
+    }
+
+    h6 {
+        span {
+            text-decoration: underline;
+        }
+    }
+
+    display: flex;
+    flex-direction: column;
+
+    border-bottom: 1px solid $blue2;
+}
+
+.express {
+    @extend .heading;
+    background-color: white;
+    // border: 1px solid #white;
+    border: 0;
+    border-top: 1px solid $blue2;
+
+    h2 {
+        margin-bottom: 20px;
+    }
+}
+
+.videoUI {
+    background-color: black; // #f8f8f8;
+    border: 1px solid black;
+    border-radius: 8px;
+    // padding: 10px;
+
+    height: 356px;
+    min-height: 356px;
+}
+
+.right {
+    display: flex;
+    flex-direction: column;
+
+    width: 600px;
+    gap: 10px;
+}
+
+.script {
+    // background-color: #f8f8f8;
+    border: 1px solid $blue2;
+    border-radius: 8px;
+    padding: 30px;
+    background-color: white;
+
+    span {
+        margin-bottom: 20px;
+        display: inline-block;
+    }
+
+    padding-bottom: 55px;
+}
+
+.scriptSection {
+    max-height: 616px;
+    overflow-y: auto;
+    margin-right: -30px;
+    padding-right: 30px;
+}
+
+.scriptFooter {
+    margin-top: -54px;
+    margin-left: 460px;
+}
+
+.emotion {
+    display: flex;
+    flex-direction: row;
+    margin-top: 5px;
+    margin-bottom: 10px;
+
+    h5 {
+
+    }
+
+    .bar {
+        position: fixed;
+        // background-color: $orange;
+        // width: 350px;
+        height: 18px;
+        margin-top: 5px;
+        margin-left: 140px;
+    }
+
+    p {
+        margin-left: auto;
+    }
+}
