@@ -14,11 +14,14 @@ import {
 
 import styles from './Layout.module.scss';
 
+import { fetchAccessToken } from "@humeai/voice";
+
 export default function Layout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+
     return (
         <div className={styles.container}>
             <div className={styles.navbar}>

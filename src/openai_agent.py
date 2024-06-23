@@ -36,14 +36,17 @@ class OpenAIAgent:
                         functions=[schema],
                         **kwargs
                     )
-                    llm_output = llm_result.choices[0].message.function_call.arguments
+                    try:
+                        llm_output = llm_result.choices[0].message.function_call.arguments
+                    except:
+                        llm_output = llm_result.choices[0].message.content
                 else:
                     llm_result = self.client.chat.completions.create(
                         messages=messages,
                         stream=False,
                         **kwargs
                     )
-                    llm_output = output = llm_result.choices[0].message.content
+                    llm_output = llm_result.choices[0].message.content
                 break
             except openai.APIConnectionError as e:
                 print('error', e)
@@ -51,12 +54,16 @@ class OpenAIAgent:
 
         if llm_result is None: return None
 
+        print(llm_result)
+        print(llm_output)
         if schema:
             try:
                 json_response = json.loads(llm_output)
-                return model.model_validate(json_response, strict=False)
+                return json_response
+                # print(json_response)
+                # return model.model_validate(json_response, strict=False)
             except: pass
-        return llm_result
+        return llm_output
 
 
     @staticmethod
@@ -82,7 +89,31 @@ class OpenAIAgent:
             "required": list(annotations.keys()),
         }
 
+class Paragraph:
+    paragraph: int
+    score: float
 
+def get_paragraph(emotion: str, paragraphs: list[str]):
+    agent = OpenAIAgent()
+    return agent.call(
+        prompt=f"You are an agent, who for educational purposes will make one of the following paragraphs have this emotion: {emotion}",
+        query="Choose one paragraph from the provided paragraphs and provide the paragraph number and on a scale of 0-1 how much this emotion should be emphasized." \
+        + "\n".join([
+            f"{i+1}. {para}\n"
+            for i, para in enumerate(paragraphs)
+        ]) + "\n\nRETURN VALID JSON",
+        model=Paragraph
+    )
+
+def get_paragraphs(emotions: list[str], paragraphs: list[str]):
+    copy = paragraphs.copy()
+    chosen = {}
+    for e in emotions:
+        response = get_paragraph(e, paragraphs)
+        chosen[e] = {'paragraph_ind': copy.index(paragraphs[response['paragraph']-1]),
+                     'score': response['score']}
+        paragraphs.pop(response['paragraph']-1)
+    return chosen
 
 if __name__ == '__main__':
     class WeatherModel(BaseModel):
@@ -92,3 +123,4 @@ if __name__ == '__main__':
     agent = OpenAIAgent()
     agent.call(query="hi, can u get me weather of nyc", model=WeatherModel)
 
+    get_paragraph("happy", ["hi how are you", "No"])

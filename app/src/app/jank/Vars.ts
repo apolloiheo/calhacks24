@@ -44,3 +44,9 @@ export const prefilledSpeeches = [
         speech: mlkSpeech,
     }
 ];
+
+export const steps = [
+    'Select script and set settings',
+    'Record speech',
+    'Review your speech',
+  ];

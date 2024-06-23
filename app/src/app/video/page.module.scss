@@ -17,7 +17,7 @@ $navy: rgb(15, 23, 42);
     display: flex;
     flex-direction: row;
 
-    padding: 120px 0 80px 100px;
+    padding: 120px 0 80px 120px;
     // padding-top: 120px;
     // padding: 20px;
 
@@ -95,6 +95,7 @@ $navy: rgb(15, 23, 42);
 }
 
 .right {
+    margin-top: 30px;
     display: flex;
     flex-direction: column;
 
@@ -122,8 +123,8 @@ $navy: rgb(15, 23, 42);
 }
 
 .scriptSection {
-    max-height: 616px;
-    min-height: 616px;
+    max-height: 586px;
+    min-height: 586px;
     overflow-y: auto;
     margin-right: -30px;
     padding-right: 30px;
@@ -162,10 +163,10 @@ $navy: rgb(15, 23, 42);
 .context {
     // border: 1px solid black;
     width: 260px;
-    margin-top: 50px;
+    margin-top: 80px;
     margin-left: -40px;
-    max-height: 705px;
-    min-height: 705px;
+    max-height: 675px;
+    min-height: 675px;
 
     padding: 30px;
     padding-left: 15px;
@@ -194,4 +195,13 @@ $navy: rgb(15, 23, 42);
             display: none;
         }
     }
+}
+
+.stepper {
+    display: fixed;
+    position: fixed;
+    margin-top: 100px;
+    padding-left: 635px;
+
+    font-size: 16px;
 }

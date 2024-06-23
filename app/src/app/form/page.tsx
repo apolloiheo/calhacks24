@@ -13,8 +13,8 @@ import {
     SelectTrigger,
     SelectValue,
   } from "@/components/ui/select"
-import { Checkbox, FormControlLabel, FormGroup, TextareaAutosize } from "@mui/material";
-import { emotions, prefilledSpeeches } from "../jank/Vars";
+import { Checkbox, FormControlLabel, FormGroup, Step, StepLabel, Stepper, TextareaAutosize } from "@mui/material";
+import { emotions, prefilledSpeeches, steps } from "../jank/Vars";
 import { Label } from "@/components/ui/label";
 
 import { styled } from '@mui/system';
@@ -152,6 +152,24 @@ export default function FormPage() {
   const [isFocused, setIsFocused] = useState(false);
 
     return (
+      <>
+      
+      <div className={styles.stepper}>
+          <Stepper activeStep={0} alternativeLabel
+          >
+          {steps.map((label) => (
+              <Step key={label}>
+              <StepLabel
+              sx={{
+                "& .MuiStepLabel-labelContainer span": {
+                  fontSize: 13
+                }
+              }}
+              >{label}</StepLabel>
+              </Step>
+          ))}
+          </Stepper>
+          </div>
         <div className={styles.container}>
             <div className={styles.header}>
                 Select Speech
@@ -226,5 +244,6 @@ export default function FormPage() {
         />
             </div>
         </div>
+        </>
     )
 }
