@@ -107,31 +107,54 @@ export default function VideoPage({
 
 //   const accessToken = localStorage.getItem('hume');
 
-    const title = localStorage.getItem("title") || "I Have a Dream";
-    const author = localStorage.getItem("author") || "Martin Luther King Jr.";
-    // console.log("text", localStorage.getItem("text"));
-    const speech = localStorage.getItem("text") || speech2.replace(/\n/g, '\n\n');
-    // console.log('speech', speech);
+const [title, setTitle] = useState('I Have a Dream');
+    const [author, setAuthor] = useState('Martin Luther King Jr.');
+    const [speech, setSpeech] = useState(speech2.replace(/\n/g, '\n\n'));
 
-    // const wordsRead = 200;
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const savedTitle = localStorage.getItem('title');
+            const savedAuthor = localStorage.getItem('author');
+            const savedSpeech = localStorage.getItem('text');
 
-  const [inputValue, setInputValue] = useState('');
-    const handleSendMessage = () => {
-        sendMessage(inputValue);
-        setInputValue('');
-      };
-
-    const selectedEmotions: Record<string,number> = {};
-    const expString = localStorage.getItem("expressions");
-    const emotionsStringList = (expString ? JSON.parse(expString) as any[] : emotions.slice(0, 3));
-    emotionsStringList.forEach((obj, i) => {
-        if (Object.keys(selectedEmotions).length === 3) {
-            return;
+            if (savedTitle) setTitle(savedTitle);
+            if (savedAuthor) setAuthor(savedAuthor);
+            if (savedSpeech) setSpeech(savedSpeech.replace(/\n/g, '\n\n'));
         }
-        if (obj) {
-            selectedEmotions[emotions[i]] = 0;
+    }, []);
+
+    // const selectedEmotions: Record<string,number> = {};
+    // const expString = localStorage.getItem("expressions");
+    // const emotionsStringList = (expString ? JSON.parse(expString) as any[] : emotions.slice(0, 3));
+    // emotionsStringList.forEach((obj, i) => {
+    //     if (Object.keys(selectedEmotions).length === 3) {
+    //         return;
+    //     }
+    //     if (obj) {
+    //         selectedEmotions[emotions[i]] = 0;
+    //     }
+    // })
+
+    const [selectedEmotions, setSelectedEmotions] = useState<Record<string, number>>({});
+    
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const expString = localStorage.getItem("expressions");
+            const emotionsStringList = expString ? JSON.parse(expString) as any[] : emotions.slice(0, 3);
+            const updatedEmotions: Record<string, number> = {};
+
+            emotionsStringList.forEach((obj, i) => {
+                if (Object.keys(updatedEmotions).length === 3) {
+                    return;
+                }
+                if (obj) {
+                    updatedEmotions[emotions[i]] = 0;
+                }
+            });
+
+            setSelectedEmotions(updatedEmotions);
         }
-    })
+    }, []);
 
     const [expressionData, setExpressionData] = useState(Object.keys(selectedEmotions)?.length ? selectedEmotions : {
         calmness: 0,
@@ -202,7 +225,7 @@ export default function VideoPage({
     let ws: WebSocket | null = null;
 
     const [audioExpressions, setAudioExpressions] = useState(null);
-    const transformData = (expressionData, values: any[]): { [key: string]: number } => {
+    const transformData = (expressionData: any, values: any[]): { [key: string]: number } => {
         const result: { [key: string]: number } = {...expressionData};
         console.log('emotions', values);
         Object.keys(selectedEmotions).forEach((emotion) => {
@@ -233,7 +256,6 @@ export default function VideoPage({
         const url = 'ws://localhost:8010/ws-audio'; // Adjust the URL if needed
         ws = new WebSocket(url);
         ws.onmessage = (message) => {
-          setLastMessage(message);
           console.log('message', message);
         }
         ws.onclose = () => {
@@ -304,11 +326,12 @@ export default function VideoPage({
             
                 const data = await response.json();
                 console.log('Success:', data);
-                const newContext = Array.from({length: getWordCount(speech)}, (_, i) => []);
-                Object.keys(data.result).forEach((emo: str, i) => {
+                const newContext = Array.from({length: getWordCount(speech)}, (_, i) => [] as any[]);
+                Object.keys(data.result as any).forEach((emo: any, i) => {
                     newContext[data.result[emo].paragraph_ind] = [emo, data.result[emo].score];
                 });
-                setEmotionContext(newContext);
+                console.log({newContext});
+                setEmotionContext(newContext as any);
               } catch (error) {
                 console.error('Error:', error);
               }
@@ -346,7 +369,7 @@ export default function VideoPage({
     }, [wordsRead, parentRef]);
 
 
-    const webcamRef = useRef(null);
+    const webcamRef = useRef<any>(null);
     useEffect(() => {
         const id = setInterval(async () => {
             if (webcamRef && ws) {
@@ -408,7 +431,7 @@ export default function VideoPage({
                 <div className={styles.express}>
                     <h2>Facial and Audial Expressions</h2>
                     {useMemo(() => sortedEntries(expressionData).map((obj, i) =>
-                        <Emotion2 key_={i} name={obj[0]} value={obj[1].toFixed(2)}/>), [expressionData])}
+                        <Emotion2 key={i} key_={i} name={obj[0]} value={(obj[1] as unknown as number).toFixed(2) as unknown as number}/>), [expressionData])}
                 </div>
             </div>
             <div className={styles.right}>
@@ -441,7 +464,7 @@ export default function VideoPage({
             <div className={styles.context}>
                 <div ref={parentRef2} className={styles.scriptSection2}>
                     {emotionContext.map((item, index) => (
-                        item[0] ? <div ref={paraRef2.current[index]} key={index} style={{
+                        (item[0] && item[1] && item[0] !== "c") ? <div ref={paraRef2.current[index]} key={index} style={{
                             marginTop: 2000, 
                             color: Object.keys(expressionData).findIndex(item => item == item[0]) ? `${colors[
                                 Object.keys(expressionData).findIndex(item => item == item[0])
@@ -453,7 +476,8 @@ export default function VideoPage({
                                         Object.keys(expressionData).findIndex(item => item == item[0])
                                     ]
                                 }}
-                            >{`${item[0]} - ${(item[1] * 1.3).toFixed(2)}`}</p>
+                                className={styles[`STYLE${Object.keys(expressionData).findIndex(item => item == item[0])}`]}
+                            >{`${item[0]} - ${((item[1] as unknown as number) * 1.3).toFixed(2)}`}</p>
                         </div> : null
                     ))}
                     <div style={{height: 2000}}/>

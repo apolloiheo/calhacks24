@@ -28,7 +28,11 @@ origins = [
     "http://localhost:8010",
     "ws://localhost:8010",
     "http://localhost:3001",
+    "http://127.0.0.1:3001",
     "http://localhost",
+    "localhost",
+    "127.0.0.1",
+    "*",
 ]
 
 app.add_middleware(
@@ -60,7 +64,11 @@ def process_text(request: RequestModel):
     # Example logic for processing text and emotions
     # result = [f"Processed with emotion '{emotion}'" for emotion in emotions]
     
-    return {"result": get_paragraphs(emotions, paragraphs)}
+    for _ in range(10):
+        try:
+            return {"result": get_paragraphs(emotions, paragraphs)}
+        except: pass
+    return None
 
 from hume_agent import configs, hume_client
 

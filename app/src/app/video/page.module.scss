@@ -188,6 +188,16 @@ $navy: rgb(15, 23, 42);
         div {
             // position: fixed;
             display: block;
+
+            p.STYLE0 {
+                color: hsl(24.6 95% 53.1%) !important;
+            }
+            p.STYLE1 {
+                color: hsl(142.1 76.2% 36.3%) !important;
+            }
+            p.STYLE2{
+                color: hsl(262.1 83.3% 57.8%) !important;
+            }
         }
         // z-index: 1;
 

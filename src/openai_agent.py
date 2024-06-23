@@ -58,7 +58,7 @@ class OpenAIAgent:
         print(llm_output)
         if schema:
             try:
-                json_response = json.loads(llm_output)
+                json_response = json.loads(llm_output.replace("```json\n", "").replace("\n```", ""))
                 return json_response
                 # print(json_response)
                 # return model.model_validate(json_response, strict=False)
