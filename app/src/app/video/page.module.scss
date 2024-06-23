@@ -111,7 +111,11 @@ $navy: rgb(15, 23, 42);
 
     span {
         margin-bottom: 20px;
-        display: inline-block;
+        display: block;
+
+        p {
+            display: inline;
+        }
     }
 
     padding-bottom: 55px;
@@ -119,6 +123,7 @@ $navy: rgb(15, 23, 42);
 
 .scriptSection {
     max-height: 616px;
+    min-height: 616px;
     overflow-y: auto;
     margin-right: -30px;
     padding-right: 30px;
@@ -160,6 +165,7 @@ $navy: rgb(15, 23, 42);
     margin-top: 50px;
     margin-left: -40px;
     max-height: 705px;
+    min-height: 705px;
 
     padding: 30px;
     padding-left: 15px;

@@ -7,8 +7,11 @@ import React, { createRef, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { CircularProgress, Fab } from "@mui/material";
+import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
+import { emotions } from "../jank/Vars";
 
-const speech = `I am happy to join with you today in what will go down in history as the greatest demonstration for freedom in the history of our nation.
+const speech2= `I am happy to join with you today in what will go down in history as the greatest demonstration for freedom in the history of our nation.
 Five score years ago a great American in whose symbolic shadow we stand today signed the Emancipation Proclamation. This momentous decree came as a great beckoning light of hope to millions of Negro slaves who had been seared in the flames of withering injustice. It came as a joyous daybreak to end the long night of their captivity.
 But one hundred years later the Negro is still not free. One hundred years later the life of the Negro is still sadly crippled by the manacles of segregation and the chains of discrimination.
 One hundred years later the Negro lives on a lonely island of poverty in the midst of a vast ocean of material prosperity.
@@ -35,6 +38,12 @@ Let freedom ring from Lookout Mountain in Tennessee!
 Let freedom ring from every hill and molehill in Mississippi. From every mountainside, let freedom ring.
 And when this happens, when we allow freedom to ring, when we let it ring from every village and hamlet, from every state and every city, we will be able to speed up that day when all of God’s children, black men and white men, Jews and Gentiles, Protestants and Catholics, will be able to join hands and sing in the words of the old Negro spiritual, “Free at last! Free at last! Thank God almighty, we’re free at last!”
 `;
+
+const getWordCount = (speech: string) => {
+    // Split the speech by spaces and filter out any empty strings
+    const words = speech.trim().split(/\s+/);
+    return words.length;
+  };
 
 const Emotion = ({
     key_,
@@ -68,8 +77,8 @@ const Emotion2 = ({
     ];
 
     return (
-        <div className={styles.emotion}>
-            <h5>{name}</h5>
+        <div key={key_} className={styles.emotion}>
+            <h5 style={{color: colors[key_]}}>{name}</h5>
             <div style={{ width: 350 * Math.min(value, 1), backgroundColor: colors[key_] }} className={styles.bar}/>
             {
                 value > 0.4 ?
@@ -82,24 +91,42 @@ const Emotion2 = ({
 
 export default function VideoPage() {
 
-    const title = "I Have a Dream";
-    const author = "Martin Luther King Jr.";
+    const title = localStorage.getItem("title") || "I Have a Dream";
+    const author = localStorage.getItem("author") || "Martin Luther King Jr.";
+    console.log("text", localStorage.getItem("text"));
+    const speech = localStorage.getItem("text") || speech2;
+    console.log('speech', speech);
 
-    const expressionData = {
-        calmness: 0.75,
-        concentration: 0.62,
-        boredom: 0.35,
+    // const wordsRead = 200;
+
+    const selectedEmotions: Record<string,number> = {};
+    const expString = localStorage.getItem("expressions");
+    (expString ? JSON.parse(expString) as any[] : emotions.slice(0, 3)).forEach((obj, i) => {
+        if (Object.keys(selectedEmotions).length === 3) {
+            return;
+        }
+        if (obj) {
+            selectedEmotions[emotions[obj]] = 0;
+        }
+    })
+
+    const expressionData = Object.keys(selectedEmotions)?.length ? selectedEmotions : {
+        calmness: 0,
+        concentration: 0,
+        boredom: 0,
     } as Record<string, number>;
 
     // Convert the object to an array of [key, value] pairs
-    const sortedEntries = Object.entries(expressionData).sort(([, a], [, b]) => b - a);
-    console.log(sortedEntries);
+    const sortedEntries = (expData: Record<string, number>) => 
+        Object.entries(expressionData).sort(([, a], [, b]) => b - a);
+    // const sortedEntries = Object.entries(expressionData).sort(([, a], [, b]) => b - a);
+    // console.log(sortedEntries);
 
-    console.log({speech});
+    // console.log({speech});
 
     const [displayVideo, setDisplayVideo] = useState(false);
 
-    const speechLines = speech.split("\n");
+    const speechLines = speech.split("\n\n");
 
     const parentRef = useRef<any>(null);
     const parentRef2 = useRef<any>(null);
@@ -132,6 +159,14 @@ export default function VideoPage() {
         return () => parentRef?.current?.removeEventListener('scroll', onScroll);
     }, [parentRef]);
 
+    const [loading, setLoading] = useState(false);
+    useEffect(() => {
+        if (displayVideo) {
+            return;
+        }
+        setLoading(true);
+    }, [displayVideo]);
+
     const lines = 26;
     const emotionContext = [
         "",
@@ -162,6 +197,35 @@ export default function VideoPage() {
         "",
     ];
 
+    let words = 0;
+    const setWordsZero = () => { words = 0; return true; };
+
+    const [wordsRead, setWordsRead] = useState(200);
+
+    // jank
+    useEffect(() => {
+        const sleep = (ms: number) => {
+            return new Promise(resolve => setTimeout(resolve, ms));
+          };
+
+        const wait = async() => {
+            await sleep(2000);
+            // setDisplayVideo(true);
+            // setWordsRead(wordsRead + 1);
+        }
+        wait();
+    }, []);
+
+    const wordsRef = useRef<any[]>(Array.from({ length: getWordCount(speech) }, (_, i) => createRef()));
+    useEffect(() => {
+        // console.log('1', wordsRef.current[wordsRead].current.getBoundingClientRect() );
+        // parentRef.current.scrollTop = 200;
+        if (!wordsRef.current[wordsRead]) {
+            return;
+        }
+        parentRef.current.scrollTop += wordsRef.current[wordsRead].current.getBoundingClientRect().top - 202;
+    }, [wordsRead, parentRef]);
+
     return (
         <div className={styles.container}>
             <div className={styles.left}>
@@ -170,7 +234,7 @@ export default function VideoPage() {
                     <h6>by <span>{author}</span></h6>
                 </div>
                 <div className={styles.videoUI} onClick={() => setDisplayVideo((obj) => !obj)}>
-                    {displayVideo && <Webcam
+                    {displayVideo ? (<><Webcam
                         audio={true}
                         height={720}
                         // screenshotFormat="image/jpeg"
@@ -180,13 +244,16 @@ export default function VideoPage() {
                             height: 720,
                             facingMode: 'user',
                         }}
-                        style={{ borderRadius: '7px' }}
+                        style={{ borderRadius: '7px', display: loading ? 'none' : 'block' }}
                         mirrored
-                    />}
+                        onUserMedia={() => setLoading(false)}
+                    />{loading && <CircularProgress style={{marginLeft: 313, marginTop: 153}}/>}</>):
+                    <Fab style={{marginTop: 148, marginLeft: 302}}><VideoCameraFrontIcon fontSize='large' style={{color: 'rgb(15, 23, 42)'}} /></Fab>}
+                    {/* <VideoCameraFrontIcon fontSize='large' style={{color: 'white', marginLeft: 300, marginTop: 150}} /> */}
                 </div>
                 <div className={styles.express}>
                     <h2>Facial Expressions</h2>
-                    {sortedEntries.map((obj, i) =>
+                    {sortedEntries(expressionData).map((obj, i) =>
                         <Emotion2 key_={i} name={obj[0]} value={obj[1]}/>)}
                 </div>
             </div>
@@ -202,15 +269,19 @@ export default function VideoPage() {
 
                 <div className={styles.script}>
                     <div ref={parentRef} className={styles.scriptSection}>
-                        {speech.split('\n').map((item, index) => (
-                            <span ref={paraRef.current[index]} key={index}>
-                                {item}
-                            </span>
-                        ))}
+                        {setWordsZero() && speech.split('\n\n').map((item, index) => {
+                            // console.log(speech.split("\n"))
+                            return (<span ref={paraRef.current[index]} key={index}>
+                                {item.split(" ").map((obj, i) => {
+                                    words += 1;
+                                    // console.log(words, wordsRead);
+                                    return <p ref={wordsRef.current[words-1]} style={{color: words < wordsRead ? 'grey' : 'black'}} key={i}>{obj} </p>})}
+                            </span>);
+})}
                     </div>
                 </div>
                 <div className={styles.scriptFooter}>
-                    <Chip label="Words: 650/1320" variant="outlined"/>
+                    <Chip label={`Words: ${wordsRead}/${getWordCount(speech)}`} variant="outlined"/>
                 </div>
             </div>
             <div className={styles.context}>
