@@ -3,26 +3,10 @@ import Webcam from "react-webcam";
 import styles from "./page.module.scss";
 
 import Chip from '@mui/material/Chip';
-import React, { useState } from "react";
- 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import React, { createRef, useEffect, useRef, useState } from "react";
+
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const speech = `I am happy to join with you today in what will go down in history as the greatest demonstration for freedom in the history of our nation.
 Five score years ago a great American in whose symbolic shadow we stand today signed the Emancipation Proclamation. This momentous decree came as a great beckoning light of hope to millions of Negro slaves who had been seared in the flames of withering injustice. It came as a joyous daybreak to end the long night of their captivity.
@@ -115,6 +99,69 @@ export default function VideoPage() {
 
     const [displayVideo, setDisplayVideo] = useState(false);
 
+    const speechLines = speech.split("\n");
+
+    const parentRef = useRef<any>(null);
+    const parentRef2 = useRef<any>(null);
+    const paraRef = useRef<any[]>(speechLines.map(() => createRef()));
+    const paraRef2 = useRef<any[]>(speechLines.map(() => createRef()));
+
+    useEffect(() => {
+        console.log({paraRef});
+
+        const onScroll = () => {
+            // let prev = -parentRef?.current?.scrollTop;
+            let prev = 0;
+            paraRef.current.map((ref, i) => {
+                if (paraRef2.current[i] && paraRef2.current[i].current) {
+                    // paraRef2.current[i].current.style.marginTop = `${prev}px`;
+                    paraRef2.current[i].current.style.marginTop = 0;
+                    paraRef2.current[i].current.style.marginBottom = '20px';
+                    paraRef2.current[i].current.style.height = `${ref.current.getBoundingClientRect().height}px`;
+                }
+                prev += ref.current.getBoundingClientRect().height + 20;
+            });
+            parentRef2.current.scrollTop = parentRef.current.scrollTop;
+            console.log('scroll', parentRef?.current?.scrollTop, parentRef2.current.scrollTop);
+        }
+
+        // clean up code
+        onScroll();
+        parentRef?.current?.removeEventListener('scroll', onScroll);
+        parentRef?.current?.addEventListener('scroll', onScroll);
+        return () => parentRef?.current?.removeEventListener('scroll', onScroll);
+    }, [parentRef]);
+
+    const lines = 26;
+    const emotionContext = [
+        "",
+        "calmness",
+        "concentration",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+    ];
+
     return (
         <div className={styles.container}>
             <div className={styles.left}>
@@ -133,7 +180,7 @@ export default function VideoPage() {
                             height: 720,
                             facingMode: 'user',
                         }}
-                        style={{ borderRadius: '8px' }}
+                        style={{ borderRadius: '7px' }}
                         mirrored
                     />}
                 </div>
@@ -145,26 +192,35 @@ export default function VideoPage() {
             </div>
             <div className={styles.right}>
                 <div style={{display: 'flex', flexDirection: 'row'}}>
-                    <Button style={{padding: '0 20px', marginTop: 3, height: 38}}>
-                        Back
+                    <Button asChild style={{padding: '0 20px', marginTop: 3, height: 38}}>
+                        <Link href="/form">Back</Link>
                     </Button>
-                    <Button style={{marginLeft: 'auto', padding: '0 20px', marginTop: 3, height: 38}}>
-                        Next
+                    <Button asChild style={{marginLeft: 'auto', padding: '0 20px', marginTop: 3, height: 38}}>
+                        <Link href="/stats">Next</Link>
                     </Button>
                 </div>
 
                 <div className={styles.script}>
-                    <div className={styles.scriptSection}>
-                        {speech
-                            .split('\n').map((item, index) => (
-                                <span key={index}>
+                    <div ref={parentRef} className={styles.scriptSection}>
+                        {speech.split('\n').map((item, index) => (
+                            <span ref={paraRef.current[index]} key={index}>
                                 {item}
-                                </span>
+                            </span>
                         ))}
                     </div>
                 </div>
                 <div className={styles.scriptFooter}>
                     <Chip label="Words: 650/1320" variant="outlined"/>
+                </div>
+            </div>
+            <div className={styles.context}>
+                <div ref={parentRef2} className={styles.scriptSection2}>
+                    {emotionContext.map((item, index) => (
+                        <div ref={paraRef2.current[index]} key={index} style={{marginTop: 2000}}>
+                            {item}
+                        </div>
+                    ))}
+                    <div style={{height: 2000}}/>
                 </div>
             </div>
 
